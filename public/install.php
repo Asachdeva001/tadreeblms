@@ -32,6 +32,7 @@ $migrationDoneFile = __DIR__ . '/../.migrations_done';
 $seedDoneFile = __DIR__ . '/../.seed_done';
 $dbConfigFile = __DIR__ . '/db_config.json';
 
+
 // --------------------
 // Helpers
 // --------------------
@@ -89,7 +90,7 @@ if ($current === 'db_config' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 echo "<!DOCTYPE html>
 <html>
 <head>
-<title>Laravel Installer</title>
+<title>Academy Installer</title>
 <style>
 body{font-family:Arial;background:#f7f7f7;padding:20px;}
 .container{max-width:700px;margin:50px auto;background:#fff;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);}
@@ -99,10 +100,14 @@ h2{margin-bottom:20px;}
 .output{background:#000;color:#0f0;padding:10px;height:300px;overflow:auto;font-family:monospace;}
 .button{display:inline-block;margin-top:20px;padding:10px 20px;background:#4caf50;color:#fff;text-decoration:none;border-radius:5px;}
 input{padding:8px;width:100%;margin-bottom:15px;}
+.logo{
+text-align:center
+}
 </style>
 </head>
 <body>
 <div class='container'>
+<div class='logo'><img src='./assets/img/logo.png' ></div>
 <h2>{$steps[$current]}</h2>
 <div class='progress'><div class='bar' id='bar'>0%</div></div>
 <div class='output' id='log'>";
@@ -304,8 +309,10 @@ try {
                 out("Warning: .env file not found. Could not set APP_INSTALLED=true");
             }
 
+            $appUrl = dirname($_SERVER['REQUEST_URI'], 1); // remove install.php
+            $appUrl = rtrim($appUrl, '/');
             out("Installer flag created. This system is now installed.");
-            echo "<br><a class='button' href='../'>Open Application</a>";
+            echo "<br><a class='button' href='{$appUrl}/'>Open Application</a>";
             break;
 
 
