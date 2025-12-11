@@ -1,13 +1,10 @@
 <?php
+ob_start();
 header('Content-Type: application/json');
-error_reporting(0); // hide warnings/notices
 
-$output = "";
-$status = "ok";
-$show_db_form = false;
-$next = "";
-
-// Paths & Files
+// --------------------
+// Paths & files
+// --------------------
 $basePath = realpath(__DIR__ . '/..');
 $envFile = $basePath . '/.env';
 $dbConfigFile = __DIR__ . '/db_config.json';
@@ -15,174 +12,231 @@ $migrationDoneFile = $basePath . '/.migrations_done';
 $seedDoneFile = $basePath . '/.seed_done';
 $installedFlag = $basePath . '/installed';
 
-$steps = ["check", "composer", "db_config", "env", "key", "migrate", "seed", "permissions", "finish"];
-
-$step = $_POST['step'] ?? $_GET['step'] ?? 'check';
-
-ob_start();
-
-try {
-
-    switch ($step) {
-
-        case "check":
-            $allGood = true;
-            $currentPhp = phpversion();
-            echo "<strong>System Check</strong><br>";
-            if (version_compare($currentPhp, "8.0", ">=")) {
-                echo "✔ PHP $currentPhp OK<br>";
-            } else {
-                echo "❌ PHP 8.0+ required, found $currentPhp<br>";
-                $allGood = false;
-            }
-
-            $requiredExtensions = ['pdo', 'pdo_mysql', 'openssl', 'mbstring', 'tokenizer', 'xml', 'ctype', 'json', 'bcmath', 'fileinfo', 'curl', 'gd', 'zip'];
-            foreach ($requiredExtensions as $ext) {
-                if (extension_loaded($ext)) {
-                    echo "✔ $ext enabled<br>";
-                } else {
-                    echo "❌ Missing extension: $ext<br>";
-                    $allGood = false;
-                }
-            }
-
-            // Composer check
-            $composerCmd = null;
-            $paths = ['/usr/local/bin/composer', '/usr/bin/composer', 'composer'];
-            foreach ($paths as $path) {
-                $test = @shell_exec("$path --version 2>&1");
-                if ($test && stripos($test, "Composer") !== false) {
-                    $composerCmd = $path;
-                    break;
-                }
-            }
-            if ($composerCmd) {
-                echo "✔ Composer found: $composerCmd<br>";
-            } else {
-                echo "❌ Composer not found<br>";
-                $allGood = false;
-            }
-
-            $next = $allGood ? "composer" : "check";
-            break;
-
-        case "composer":
-            ini_set('max_execution_time', 3000);
-            ini_set('memory_limit', '2G');
-
-            $projectPath = $basePath;
-            $composerCmd = '/usr/local/bin/composer';
-            $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === "WIN";
-
-            if (!$isWindows) {
-                $cmd = "cd \"$projectPath\" && COMPOSER_HOME=/tmp HOME=/tmp $composerCmd update --no-interaction --prefer-dist --ignore-platform-reqs 2>&1";
-            } else {
-                $cmd = "cd /d \"$projectPath\" && $composerCmd update --no-interaction --prefer-dist --ignore-platform-reqs 2>&1";
-            }
-
-            echo "Running Composer...<br>";
-            $res = shell_exec($cmd);
-            if ($res === null) {
-                throw new Exception("Composer cannot run (shell_exec disabled or permission issue)");
-            }
-            echo "<pre>$res</pre>";
-            echo "✔ Composer completed<br>";
-
-            $next = "db_config";
-            break;
-
-        case "db_config":
-            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['db_host'])) {
-                // Save DB config
-                file_put_contents($dbConfigFile, json_encode([
-                    'host' => $_POST['db_host'] ?? '',
-                    'database' => $_POST['db_name'] ?? '',
-                    'username' => $_POST['db_user'] ?? '',
-                    'password' => $_POST['db_pass'] ?? ''
-                ]));
-                echo "✔ DB config saved<br>";
-                $next = "env";
-                $show_db_form = false;
-            } else {
-                // Ask JS to show DB form
-                echo "Please enter database information<br>";
-                $show_db_form = true;
-                $next = "db_config"; // keep the step waiting for user input
-            }
-            break;
-
-        case "env":
-            $config = json_decode(file_get_contents($dbConfigFile), true);
-            $envExample = file_exists($basePath . '/.env.example') ? file_get_contents($basePath . '/.env.example') : "";
-            $env = preg_replace('/DB_HOST=.*/', 'DB_HOST=' . $config['host'], $envExample);
-            $env = preg_replace('/DB_DATABASE=.*/', 'DB_DATABASE=' . $config['database'], $env);
-            $env = preg_replace('/DB_USERNAME=.*/', 'DB_USERNAME=' . $config['username'], $env);
-            $env = preg_replace('/DB_PASSWORD=.*/', 'DB_PASSWORD="' . $config['password'] . '"', $env);
-            file_put_contents($envFile, $env);
-            echo "✔ .env file created<br>";
-            $next = "key";
-            break;
-
-        case "key":
-            system("php \"$basePath/artisan\" key:generate --force", $ret);
-            if ($ret !== 0) throw new Exception("APP_KEY generation failed");
-            echo "✔ APP_KEY generated<br>";
-            $next = "migrate";
-            break;
-
-        case "migrate":
-            system("php \"$basePath/artisan\" migrate --force", $ret);
-            if ($ret !== 0) throw new Exception("Migration failed");
-            file_put_contents($migrationDoneFile, "done");
-            echo "✔ Migrations completed<br>";
-            $next = "seed";
-            break;
-
-        case "seed":
-            system("php \"$basePath/artisan\" db:seed --force", $ret);
-            if ($ret !== 0) throw new Exception("Seeding failed");
-            file_put_contents($seedDoneFile, "done");
-            echo "✔ Database seeded<br>";
-            $next = "permissions";
-            break;
-
-        case "permissions":
-            // For Linux, you could chmod storage/cache if needed
-            echo "✔ Permissions set (Windows ignored)<br>";
-            $next = "finish";
-            break;
-
-        case "finish":
-            file_put_contents($installedFlag, "installed");
-            $env = file_get_contents($envFile);
-            if (str_contains($env, 'APP_INSTALLED=')) {
-                $env = preg_replace('/APP_INSTALLED=.*/', 'APP_INSTALLED=true', $env);
-            } else {
-                $env .= "\nAPP_INSTALLED=true\n";
-            }
-            file_put_contents($envFile, $env);
-            echo "✔ Installation complete<br>";
-            $next = "";
-            break;
-
-        default:
-            throw new Exception("Invalid step: $step");
-    }
-} catch (Exception $e) {
-    $status = "error";
-    echo "❌ " . $e->getMessage();
+// --------------------
+// Helpers
+// --------------------
+function out($msg){
+    return $msg;
 }
 
-$output .= ob_get_clean();
+function fail($msg){
+    echo json_encode(['message'=>"❌ $msg", 'show_db_form'=>false]);
+    exit;
+}
 
-// Calculate progress
-$percent = round((array_search($step, $steps) + 1) / count($steps) * 100);
+function nextStep($current){
+    $steps = ["check","composer","db_config","env","key","migrate","seed","permissions","finish"];
+    $i = array_search($current, $steps);
+    return $steps[$i+1] ?? 'finish';
+}
 
-// Return JSON
-echo json_encode([
-    'status' => $status,
-    'message' => $output,
-    'show_db_form' => $show_db_form,
-    'next' => $next,
-    'percent' => $percent
-]);
+// --------------------
+// Get step
+// --------------------
+$step = $_REQUEST['step'] ?? 'check';
+
+// --------------------
+// Handle DB save
+// --------------------
+if($step === 'db_config' && $_SERVER['REQUEST_METHOD'] === 'POST'){
+    $db_host = $_POST['db_host'] ?? '';
+    $db_database = $_POST['db_database'] ?? '';
+    $db_username = $_POST['db_username'] ?? '';
+    $db_password = $_POST['db_password'] ?? '';
+
+    if(!$db_host || !$db_database || !$db_username){
+        echo json_encode([
+            'message' => 'Please fill all DB fields',
+            'show_db_form' => true,
+            'next' => 'db_config'
+        ]);
+        exit;
+    }
+
+    file_put_contents($dbConfigFile, json_encode([
+        'host'=>$db_host,
+        'database'=>$db_database,
+        'username'=>$db_username,
+        'password'=>$db_password
+    ]));
+
+    echo json_encode([
+        'message' => 'Database config saved ✔',
+        'show_db_form' => false,
+        'next' => 'env'
+    ]);
+    exit;
+}
+
+// --------------------
+// Steps
+// --------------------
+try {
+    switch($step){
+        case 'check':
+            $msg = "<strong>Checking system requirements...</strong><br>";
+            $allGood = true;
+
+            // PHP version
+            if(version_compare(PHP_VERSION, '8.0', '>=')){
+                $msg .= "✔ PHP ".PHP_VERSION." OK<br>";
+            }else{
+                $msg .= "❌ PHP 8.0+ required, current: ".PHP_VERSION."<br>";
+                $allGood=false;
+            }
+
+            // PHP extensions
+            $required = ['pdo','pdo_mysql','openssl','mbstring','tokenizer','xml','ctype','json','bcmath','fileinfo','curl','gd','zip'];
+            foreach($required as $ext){
+                if(extension_loaded($ext)){
+                    $msg .= "✔ $ext enabled<br>";
+                }else{
+                    $msg .= "❌ Missing extension: $ext<br>";
+                    $allGood=false;
+                }
+            }
+
+            if($allGood){
+                $next = nextStep($step);
+                echo json_encode(['message'=>$msg.'✔ All requirements OK','show_db_form'=>false,'next'=>$next]);
+            }else{
+                echo json_encode(['message'=>$msg.'❌ Fix errors and refresh','show_db_form'=>false]);
+            }
+            exit;
+
+        case 'composer':
+            $projectPath = $basePath;
+            $isWindows = strtoupper(substr(PHP_OS,0,3))==='WIN';
+
+            $composerCmd = $isWindows ? 'composer' : 'composer';
+            $cmd = $isWindows
+                ? "cd /d \"$projectPath\" && $composerCmd install --no-interaction --prefer-dist"
+                : "cd \"$projectPath\" && COMPOSER_HOME=/tmp HOME=/tmp $composerCmd install --no-interaction --prefer-dist";
+
+            $output = shell_exec($cmd." 2>&1");
+            if($output === null){
+                fail("Composer command failed. Ensure composer is installed and shell_exec enabled.");
+            }
+
+            echo json_encode([
+                'message'=>"Composer completed.<br><pre>$output</pre>",
+                'show_db_form'=>false,
+                'next'=>nextStep($step)
+            ]);
+            exit;
+
+        case 'db_config':
+            // Show DB form if config not exists
+            if(!file_exists($dbConfigFile)){
+                echo json_encode([
+                    'message'=>'Please enter database info',
+                    'show_db_form'=>true,
+                    'next'=>$step
+                ]);
+            }else{
+                echo json_encode([
+                    'message'=>'Database config already exists ✔',
+                    'show_db_form'=>false,
+                    'next'=>nextStep($step)
+                ]);
+            }
+            exit;
+
+        case 'env':
+            if(!file_exists($dbConfigFile)) fail("DB config missing");
+
+            $config = json_decode(file_get_contents($dbConfigFile), true);
+            if(!$config) fail("DB config invalid");
+
+            $envExample = $basePath.'/.env.example';
+            if(!file_exists($envExample)) fail(".env.example not found");
+
+            $env = file_get_contents($envExample);
+            $env = preg_replace('/DB_HOST=.*/', 'DB_HOST='.$config['host'], $env);
+            $env = preg_replace('/DB_DATABASE=.*/', 'DB_DATABASE='.$config['database'], $env);
+            $env = preg_replace('/DB_USERNAME=.*/', 'DB_USERNAME='.$config['username'], $env);
+            $env = preg_replace('/DB_PASSWORD=.*/', 'DB_PASSWORD="'.$config['password'].'"', $env);
+
+            file_put_contents($envFile, $env);
+
+            echo json_encode([
+                'message'=>'.env created ✔',
+                'show_db_form'=>false,
+                'next'=>nextStep($step)
+            ]);
+            exit;
+
+        case 'key':
+            system("php $basePath/artisan key:generate --force", $ret);
+            if($ret!==0) fail("APP_KEY generation failed");
+
+            echo json_encode([
+                'message'=>'✔ APP_KEY generated',
+                'show_db_form'=>false,
+                'next'=>nextStep($step)
+            ]);
+            exit;
+
+        case 'migrate':
+            system("php $basePath/artisan migrate --force", $ret);
+            if($ret!==0) fail("Migration failed");
+
+            file_put_contents($migrationDoneFile,"done");
+
+            echo json_encode([
+                'message'=>'✔ Migrations completed',
+                'show_db_form'=>false,
+                'next'=>nextStep($step)
+            ]);
+            exit;
+
+        case 'seed':
+            system("php $basePath/artisan db:seed --force", $ret);
+            if($ret!==0) fail("Seeding failed");
+
+            file_put_contents($seedDoneFile,"done");
+
+            echo json_encode([
+                'message'=>'✔ Database seeded',
+                'show_db_form'=>false,
+                'next'=>nextStep($step)
+            ]);
+            exit;
+
+        case 'permissions':
+            // For Linux: chmod storage & bootstrap/cache
+            @chmod($basePath.'/storage',0775);
+            @chmod($basePath.'/bootstrap/cache',0775);
+
+            echo json_encode([
+                'message'=>'✔ Permissions set',
+                'show_db_form'=>false,
+                'next'=>nextStep($step)
+            ]);
+            exit;
+
+        case 'finish':
+            file_put_contents($installedFlag,"installed");
+            // Set APP_INSTALLED=true
+            $env = file_get_contents($envFile);
+            if(str_contains($env,'APP_INSTALLED=')){
+                $env = preg_replace('/APP_INSTALLED=.*/','APP_INSTALLED=true',$env);
+            }else{
+                $env .= "\nAPP_INSTALLED=true\n";
+            }
+            file_put_contents($envFile,$env);
+
+            echo json_encode([
+                'message'=>'✔ Installation complete! <a href="/">Open Application</a>',
+                'show_db_form'=>false
+            ]);
+            exit;
+
+        default:
+            fail("Invalid step: $step");
+    }
+} catch(Exception $e){
+    fail($e->getMessage());
+}
+
+ob_end_flush();
