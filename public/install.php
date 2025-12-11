@@ -165,21 +165,21 @@ try {
             }
 
             // FOLDER PERMISSIONS
-            $pathsToCheck = [
-                __DIR__ . '/../storage' => 'storage/',
-                __DIR__ . '/../bootstrap/cache' => 'bootstrap/cache/'
-            ];
+            // $pathsToCheck = [
+            //     __DIR__ . '/../storage' => 'storage/',
+            //     __DIR__ . '/../bootstrap/cache' => 'bootstrap/cache/'
+            // ];
 
-            out("<br><strong>Folder Permissions:</strong><br>");
+            // out("<br><strong>Folder Permissions:</strong><br>");
 
-            foreach ($pathsToCheck as $path => $label) {
-                if (is_writable($path)) {
-                    out("✔ $label is writable<br>");
-                } else {
-                    out("❌ $label is NOT writable<br>");
-                    $allGood = false;
-                }
-            }
+            // foreach ($pathsToCheck as $path => $label) {
+            //     if (is_writable($path)) {
+            //         out("✔ $label is writable<br>");
+            //     } else {
+            //         out("❌ $label is NOT writable<br>");
+            //         $allGood = false;
+            //     }
+            // }
 
             // SERVER OS TYPE
             $os = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? 'Windows / XAMPP' : 'Linux / Ubuntu';
@@ -258,6 +258,39 @@ try {
 
 
         case 'db_config':
+
+
+
+            if (0) {
+               
+                $db_host = $_POST['db_host'] ?? '';
+                $db_database = $_POST['db_database'] ?? '';
+                $db_username = $_POST['db_username'] ?? '';
+                $db_password = $_POST['db_password'] ?? '';
+
+                try {
+                    $pdo = new PDO("mysql:host=$db_host;charset=utf8", $db_username, $db_password);
+                    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+                    $pdo->exec("CREATE DATABASE IF NOT EXISTS `$db_database` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+
+                    out("✔ Database '$db_database' exists or created successfully.<br>");
+
+                    file_put_contents($dbConfigFile, json_encode([
+                        'host' => $db_host,
+                        'database' => $db_database,
+                        'username' => $db_username,
+                        'password' => $db_password
+                    ]));
+
+                    header("Location: ?step=env");
+                    exit;
+                } catch (PDOException $e) {
+                    fail("Database connection or creation failed: " . $e->getMessage());
+                }
+            }
+
+            // Display form
             echo "
                 <form method='POST'>
                     <label>DB Host</label>
@@ -277,6 +310,7 @@ try {
             ";
             echo "</div></div></body></html>";
             exit;
+
 
         case 'env':
             try {
