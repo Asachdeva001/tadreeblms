@@ -123,7 +123,7 @@ try {
 
             out("<strong>System Requirements Check</strong><br><br>");
             $allGood = true;
-
+            $outSystemOS = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? 'Windows' : 'Linux';
             // --------------------
             // 1️⃣ PHP Version
             // --------------------
@@ -181,11 +181,14 @@ try {
             // 4️⃣ Git safe.directory check
             // --------------------
             $projectPath = realpath(__DIR__ . '/..');
-            $gitSafe = shell_exec("git config --global --get-all safe.directory | grep '$projectPath'");
-            if (!$gitSafe) {
-                out("⚠ Git safe.directory not set — run: <code>git config --global --add safe.directory $projectPath</code><br>");
-            } else {
-                out("✔ Git safe.directory OK<br>");
+            if ($outSystemOS == 'Windows') {
+
+                $gitSafe = shell_exec("git config --global --get-all safe.directory | grep '$projectPath'");
+                if (!$gitSafe) {
+                    out("⚠ Git safe.directory not set — run: <code>git config --global --add safe.directory $projectPath</code><br>");
+                } else {
+                    out("✔ Git safe.directory OK<br>");
+                }
             }
 
             // --------------------
@@ -198,7 +201,7 @@ try {
                 __DIR__ . '/../vendor' => 'vendor folder'
             ];
 
-            $outSystemOS = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? 'Windows' : 'Linux';
+            
 
             out("<br><strong>Folders & Files Check:</strong><br>");
             foreach ($pathsToCheck as $path => $label) {
