@@ -295,7 +295,7 @@ try {
         case 'composer':
 
             try {
-                out("Running Composer install...");
+                out("Running Composer operation...");
                 ini_set('max_execution_time', 3000);
                 ini_set('memory_limit', '1G');
                 set_time_limit(0);
@@ -315,41 +315,35 @@ try {
                     fail("Missing required PHP extensions: " . implode(', ', $missingExtensions));
                 }
 
-                // --- Detect Composer path ---
-                $composerPaths = $isWindows
-                    ? [
-                        'composer',
-                        'C:\\ProgramData\\ComposerSetup\\bin\\composer.bat',
-                        'C:\\ProgramData\\ComposerSetup\\composer.phar',
-                        'C:\\Program Files\\Composer\\composer.bat',
-                        'C:\\composer\\composer.bat',
-                    ]
-                    : [
-                        '/usr/local/bin/composer',
-                        '/usr/bin/composer',
-                        'composer',
-                    ];
-
+                // --- Detect Composer path dynamically ---
                 $composerCmd = null;
-                foreach ($composerPaths as $path) {
+                $pathsToTry = $isWindows
+                    ? ['composer', 'composer.bat', 'composer.phar']
+                    : ['composer', '/usr/local/bin/composer', '/usr/bin/composer'];
+
+                foreach ($pathsToTry as $path) {
                     $test = @shell_exec("$path --version 2>&1");
                     if ($test && stripos($test, 'Composer') !== false) {
                         $composerCmd = $path;
                         break;
                     }
                 }
+
                 if (!$composerCmd) {
                     fail("Composer not found. Install globally and ensure it is in PATH.");
                 }
 
                 out("Using Composer: <b>$composerCmd</b><br>");
 
-                // --- Determine command: install vs update ---
-                $lockFile = $projectPath . '/composer.lock';
-                if ($isWindows) {
-                    $cmd = "set COMPOSER_HOME=%TEMP% && cd /d \"$projectPath\" && $composerCmd update --no-interaction --prefer-dist --ignore-platform-reqs 2>&1";
-                } else {
-                    $cmd = "export COMPOSER_HOME=/tmp && export HOME=/tmp && cd \"$projectPath\" && $composerCmd update --no-interaction --prefer-dist --ignore-platform-reqs 2>&1";
+                // --- Determine command: update always (safer for missing lock file) ---
+                $cmd = $isWindows
+                    ? "cd /d \"$projectPath\" && $composerCmd update --no-interaction --prefer-dist --ignore-platform-reqs 2>&1"
+                    : "cd \"$projectPath\" && COMPOSER_HOME=/tmp HOME=/tmp $composerCmd update --no-interaction --prefer-dist --ignore-platform-reqs 2>&1";
+
+                // --- Run as web server user (Linux only) ---
+                if (!$isWindows && posix_getuid() === 0) { // root check
+                    $webUser = 'www-data'; // adjust if different web user
+                    $cmd = "sudo -u $webUser COMPOSER_HOME=/tmp HOME=/tmp cd \"$projectPath\" && $composerCmd update --no-interaction --prefer-dist --ignore-platform-reqs 2>&1";
                 }
 
                 out("Executing:<br><pre>$cmd</pre>");
@@ -364,9 +358,9 @@ try {
 
                 // --- Check success ---
                 if (
-                    strpos($output, "Generating optimized autoload files") !== false ||
-                    strpos($output, "Nothing to install") !== false ||
-                    strpos($output, "Package operations") !== false
+                    stripos($output, "Generating optimized autoload files") !== false ||
+                    stripos($output, "Nothing to install") !== false ||
+                    stripos($output, "Package operations") !== false
                 ) {
                     out("✔ Composer operation completed successfully.");
                 } else {
@@ -376,6 +370,7 @@ try {
                 fail("Composer error: " . $e->getMessage());
             }
             break;
+
 
 
 
