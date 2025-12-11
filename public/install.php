@@ -1,13 +1,32 @@
 <?php
 ob_start();
 
+// --------------------
+// Remove existing .env if present
+// --------------------
+$envFile = __DIR__ . '/../.env';
+if (file_exists($envFile)) {
+    unlink($envFile);
+    file_put_contents(__DIR__ . '/install.log', date('Y-m-d H:i:s') . " - Existing .env removed\n", FILE_APPEND);
+}
 
+// --------------------
+// Remove existing db_config.json if present
+// --------------------
+$dbConfigFile = __DIR__ . '/db_config.json';
+if (file_exists($dbConfigFile)) {
+    unlink($dbConfigFile);
+    file_put_contents(__DIR__ . '/install.log', date('Y-m-d H:i:s') . " - Existing db_config.json removed\n", FILE_APPEND);
+}
+
+// --------------------
+// Remove installed flag
+// --------------------
 $installedFlag = __DIR__ . '/../installed';
-
-// If installer is re-opened, remove installed flag to allow fresh install
 if (file_exists($installedFlag)) {
     unlink($installedFlag);
 }
+
 
 // --------------------
 // Installer Steps
