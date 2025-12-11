@@ -201,37 +201,30 @@ try {
                 set_time_limit(0);
 
                 $projectPath = realpath(__DIR__ . '/..');
-
-                // Detect OS
                 $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
 
-                // Determine composer command based on OS
+                // Detect Composer path
                 if ($isWindows) {
-
-                    // Windows composer paths
                     $composerPaths = [
-                        'composer',                                   // If in PATH
+                        'composer',
                         'C:\\ProgramData\\ComposerSetup\\bin\\composer.bat',
                         'C:\\ProgramData\\ComposerSetup\\composer.phar',
                         'C:\\Program Files\\Composer\\composer.bat',
                         'C:\\composer\\composer.bat',
                     ];
                 } else {
-
-                    // Linux composer paths
                     $composerPaths = [
                         '/usr/local/bin/composer',
                         '/usr/bin/composer',
-                        'composer',                                   // fallback
+                        'composer',
                     ];
                 }
 
-                // Find a working composer path
                 $composerCmd = null;
                 foreach ($composerPaths as $path) {
                     if (stripos($path, 'composer') !== false) {
                         $test = shell_exec("$path --version 2>&1");
-                        if ($test && strpos($test, 'Composer') !== false) {
+                        if ($test && stripos($test, 'Composer') !== false) {
                             $composerCmd = $path;
                             break;
                         }
@@ -244,21 +237,19 @@ try {
 
                 out("Using Composer: <b>$composerCmd</b><br>");
 
-                // Correct CD command
-                $cd = $isWindows
-                    ? "cd /d \"$projectPath\""
-                    : "cd \"$projectPath\"";
-
-                // Final command
-                $cmd = "$cd && $composerCmd install --no-interaction --prefer-dist 2>&1";
+                // Set environment variables for Composer
+                if ($isWindows) {
+                    $cmd = "set COMPOSER_HOME=%TEMP% && cd /d \"$projectPath\" && $composerCmd install --no-interaction --prefer-dist 2>&1";
+                } else {
+                    $cmd = "export COMPOSER_HOME=/tmp && export HOME=/tmp && cd \"$projectPath\" && $composerCmd install --no-interaction --prefer-dist 2>&1";
+                }
 
                 out("Executing:<br><pre>$cmd</pre>");
 
-                // Run composer
                 $output = shell_exec($cmd);
 
                 if ($output === null) {
-                    fail("shell_exec returned NULL — likely disabled in php.ini");
+                    fail("shell_exec returned NULL — composer cannot run (disabled or permission).");
                 }
 
                 out("<pre>$output</pre>");
