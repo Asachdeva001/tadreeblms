@@ -220,79 +220,88 @@
     </div>
 
     <script>
-        let steps = ["check", "composer", "db_config", "env", "key", "migrate", "seed", "permissions", "finish"];
-        let currentIndex = 0;
+    const steps = ["check","composer","db_config","env","key","migrate","seed","permissions","finish"];
+    let currentIndex = 0;
 
-        function runStep(step) {
-            document.getElementById("startBtn").classList.add("hidden");
+    function runStep(step) {
 
-            let isDBStep = step === "db_config";
+        document.getElementById("startBtn").classList.add("hidden");
 
-            let fetchOptions = {
-                method: isDBStep ? "POST" : "GET"
-            };
+        fetch("install_ajax.php?step=" + step)
+            .then(res => res.json())
+            .then(res => {
 
-            if (isDBStep) {
-                // send DB credentials only if user filled them
-                fetchOptions.body = new URLSearchParams({
-                    db_host: document.getElementById("db_host").value,
-                    db_database: document.getElementById("db_database").value,
-                    db_username: document.getElementById("db_username").value,
-                    db_password: document.getElementById("db_password").value,
-                });
+                appendLog(res.message || '');
+
+                // ❌ HARD STOP
+                if (res.success === false) {
+                    appendLog("❌ Installation stopped");
+                    return;
+                }
+
+                // Progress bar
+                currentIndex = steps.indexOf(step);
+                updateBar(Math.round((currentIndex + 1) / steps.length * 100));
+
+                // 🔴 SHOW DB FORM AND STOP FLOW
+                if (res.show_db_form) {
+                    document.getElementById("dbform").classList.remove("hidden");
+                    return;
+                }
+
+                document.getElementById("dbform").classList.add("hidden");
+
+                // Continue only if backend says next
+                if (res.next) {
+                    setTimeout(() => runStep(res.next), 500);
+                }
+            })
+            .catch(err => appendLog("❌ AJAX error: " + err));
+    }
+
+    function saveDB() {
+        const data = new URLSearchParams({
+            db_host: document.getElementById("db_host").value,
+            db_database: document.getElementById("db_database").value,
+            db_username: document.getElementById("db_username").value,
+            db_password: document.getElementById("db_password").value
+        });
+
+        fetch("install_ajax.php?step=db_config", {
+            method: "POST",
+            body: data
+        })
+        .then(res => res.json())
+        .then(res => {
+
+            appendLog(res.message || '');
+
+            if (res.success === false) {
+                document.getElementById("dbform").classList.remove("hidden");
+                return;
             }
 
-            fetch("install_ajax.php?step=" + step, fetchOptions)
-                .then(res => res.json())
-                .then(res => {
-                    appendLog(res.message || '');
+            document.getElementById("dbform").classList.add("hidden");
 
-                    // 🚨 HARD STOP
-                    if (res.success === false) {
-                        appendLog("❌ Installation stopped");
-                        return;
-                    }
+            if (res.next) {
+                runStep(res.next);
+            }
+        })
+        .catch(err => appendLog("❌ DB save error: " + err));
+    }
 
-                    // Update progress
-                    currentIndex = steps.indexOf(step);
-                    let percent = Math.round((currentIndex + 1) / steps.length * 100);
-                    updateBar(percent);
+    function appendLog(msg) {
+        const log = document.getElementById("log");
+        log.innerHTML += msg + "<br>";
+        log.scrollTop = log.scrollHeight;
+    }
 
-                    // Show DB form if needed
-                    if (res.show_db_form) {
-                        document.getElementById("dbform").classList.remove("hidden");
-                        return;
-                    } else {
-                        document.getElementById("dbform").classList.add("hidden");
-                    }
-
-                    // Continue ONLY if success
-                    if (step !== "finish" && res.next) {
-                        setTimeout(() => runStep(res.next), 500);
-                    }
-                })
-
-                .catch(err => {
-                    appendLog("❌ AJAX error: " + err);
-                });
-        }
-
-        function saveDB() {
-            runStep("db_config");
-        }
-
-        function appendLog(msg) {
-            let log = document.getElementById("log");
-            log.innerHTML += msg + "<br>";
-            log.scrollTop = log.scrollHeight;
-        }
-
-        function updateBar(percent) {
-            let bar = document.getElementById("bar");
-            bar.style.width = percent + "%";
-            bar.innerHTML = percent + "%";
-        }
-    </script>
+    function updateBar(percent) {
+        const bar = document.getElementById("bar");
+        bar.style.width = percent + "%";
+        bar.innerHTML = percent + "%";
+    }
+</script>
 
 </body>
 
