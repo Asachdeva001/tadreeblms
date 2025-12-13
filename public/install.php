@@ -1,3 +1,12 @@
+<?php
+$basePath = realpath(__DIR__ . '/..');
+$installedFlag = $basePath . '/installed';
+
+if (file_exists($installedFlag)) {
+    header("Location: /"); // or public/
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html>
 

@@ -2,6 +2,17 @@
 ob_start();
 header('Content-Type: application/json');
 
+
+$installedFlag = $basePath . '/installed';
+
+if (file_exists($installedFlag) && ($_GET['step'] ?? '') !== 'check') {
+    echo json_encode([
+        'success' => false,
+        'message' => '❌ Application already installed'
+    ]);
+    exit;
+}
+
 // --------------------
 // Paths & files
 // --------------------
@@ -262,6 +273,33 @@ try {
 
             echo json_encode([
                 'message' => "✔ Database seeded\n" . implode("\n", $output),
+                'show_db_form' => false,
+                'next' => nextStep($step)
+            ]);
+            exit;
+
+        case 'permissions':
+
+            $paths = [
+                $basePath . '/storage',
+                $basePath . '/bootstrap/cache'
+            ];
+
+            $errors = [];
+
+            foreach ($paths as $path) {
+                if (!is_writable($path)) {
+                    $errors[] = "$path is not writable";
+                }
+            }
+
+            if ($errors) {
+                fail("Permission errors:<br>" . implode("<br>", $errors));
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => '✔ Folder permissions OK',
                 'show_db_form' => false,
                 'next' => nextStep($step)
             ]);
