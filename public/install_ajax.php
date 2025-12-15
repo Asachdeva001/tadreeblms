@@ -109,13 +109,10 @@ try {
                 }
             }
             // PHP version
-            if (
-                version_compare(PHP_VERSION, '8.2.0', '>=')
-                && version_compare(PHP_VERSION, '8.3.0', '<')
-            ) {
+            if (version_compare(PHP_VERSION, '8.2.0', '>=')) {
                 $msg .= "✔ PHP " . PHP_VERSION . " OK<br>";
             } else {
-                $msg .= "❌ PHP 8.2.x required, current: " . PHP_VERSION . "<br>";
+                $msg .= "❌ PHP 8.2 or higher required, current: " . PHP_VERSION . "<br>";
                 $allGood = false;
             }
 
