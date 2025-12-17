@@ -4458,9 +4458,8 @@ ul.product-tab li.active:after {
   height: 100%;
   content: '';
   background: #17d0cf;
-  background: -webkit-gradient(left top, right top, color-stop(0%, #4eb3bf), color-stop(51%, #17d0cf), color-stop(100%, #4eb3bf));
-  background: -webkit-gradient(linear, left top, right top, from(#01a6fd), color-stop(51%, #17d0cf), to(#01a6fd));
-  background: linear-gradient(to right, #01a6fd 0%, #17d0cf 51%, #01a6fd 100%);
+ background: linear-gradient(45deg, rgb(35 62 116) 0%, rgb(193 144 45) 100%);
+ background: linear-gradient(45deg, rgb(35 62 116) 0%, rgb(193 144 45) 100%);
   background-size: 200% auto;
   -webkit-transition: .3s all ease-in-out;
   transition: .3s all ease-in-out;
@@ -6696,7 +6695,7 @@ footer hr {
 }
 .cart-search li a:after{
   content: none;
-  background: none;
+  background: none; 
 }
 .footer-social li{border: 2px solid #ffffff !important;}
 .copy-right-menu p {
