@@ -6825,6 +6825,8 @@ position: absolute;
 .navbar .form-control{border: 1px solid #cb9a3673 !important;}
 .navbar .input-group-text{background-color: #cb9a3673 !important;
     border: 1px solid #cb9a3673 !important;}
+    .category-icon i.text-gradiant{-webkit-text-fill-color: unset !important;
+    background: none !important;}
 .outcategory {
     background: #d9e1ee !important;
     border-radius: 100px !important;
