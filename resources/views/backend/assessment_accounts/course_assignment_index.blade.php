@@ -144,9 +144,9 @@
                 processing: true,
                 serverSide: true,
                 searching: false,
-                //ajax: "/user/course-assign-list",
+                //ajax: "/user/course-assign-list", 
                 ajax: {
-                    url: "/user/course-assign-list",
+                    url: "{{ route('admin.assessment_accounts.course-assign-list') }}",
                     type: "GET",
                     data: function (d) {
                         d.user_id = user_id;

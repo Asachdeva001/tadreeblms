@@ -42,6 +42,11 @@
         border: none
     }
 
+    input.captcha {
+        width: 100px !important;
+        height: 30px !important;
+    }
+
     @media (max-width: 768px) {
         .modal-dialog {
             min-height: calc(100vh - 20px);
@@ -110,13 +115,11 @@
                                 </a>
                             </div>
 
-                            @if(config('access.captcha.registration'))
-                                <div class="contact-info mb-2 text-center">
-                                    {!! no_captcha()->display() !!}
-                                    <input type="hidden" name="captcha_status" value="true">
-                                    <span id="login-captcha-error" class="text-danger"></span>
-                                </div>
-                            @endif
+                            <div class="contact-info mb-2 catcha-block">
+                                <label>Captcha: <span id="login-captcha-question"></span></label>
+                                <input type="text" name="captcha" class="captcha" required>
+                                <span id="login-captcha-error" class="text-danger"></span>
+                            </div>
 
                             <div class="nws-button text-center white text-capitalize">
                                 <button type="submit">@lang('labels.frontend.modal.login_now')</button>
@@ -197,7 +200,7 @@
                             </div>
 
                             <!-- Language Select -->
-                            <div class="contact-info mb-2">
+                            <div class="contact-info mb-2 plang">
                                 <label>Preferred Language</label><br>
 
                                 <label class="radio-inline mr-3 mb-0">
@@ -254,13 +257,11 @@
                                 @endforeach
                             @endif
 
-                            @if(config('access.captcha.registration'))
-                                <div class="contact-info mt-3 text-center">
-                                    {!! no_captcha()->display() !!}
-                                    <input type="hidden" id="captcha_status" name="captcha_status" value="true">
-                                    <span id="captcha-error" class="text-danger"></span>
-                                </div>
-                            @endif
+                            <div class="contact-info mb-2 catcha-block">
+                                <label>Captcha: <span id="register-captcha-question"></span></label>
+                                <input type="text" name="captcha" class="captcha" required>
+                                <span id="captcha-error" class="text-danger"></span>
+                            </div>
 
                             <div class="nws-button text-center white text-capitalize">
                                 <button id="registerButton" type="submit">@lang('labels.frontend.modal.register_now')</button>
@@ -306,11 +307,7 @@
 
 
 
-    @if(config('access.captcha.registration'))
-        {{ no_captcha()->script() }}
-
-    @endif
-
+    
     <script>
         $(function () {
             $.ajaxSetup({
@@ -340,6 +337,10 @@
                         type: "GET",
                         url: "{{route('frontend.auth.login')}}",
                         success: function (response) {
+
+                            //console.log(response)
+
+                            $('#login-captcha-question').html(response.captcha_question)
                             $('#socialLinks').html(response.socialLinks)
                             const $modal = $('#myModal');
 
@@ -365,7 +366,7 @@
                         success: function (response) {
                             $('#socialLinks').html(response.socialLinks);
 
-            
+                             $('#register-captcha-question').html(response.captcha_question);
                             let form = $('#myRegisterModal').find('form')[0];
                             if (form) form.reset();
 

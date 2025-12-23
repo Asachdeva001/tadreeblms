@@ -251,6 +251,7 @@ class LessonsController extends Controller
      */
     public function store(StoreLessonsRequest $request)
     {
+        //dd("jj");
         if (!Gate::allows('lesson_create')) {
             return abort(401);
         }

@@ -50,6 +50,15 @@
                                 </div><!--form-group-->
                             </div><!--col-->
                         </div><!--row-->
+                        
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label>Captcha: {{ session('captcha_question') }}</label>
+                                    <input type="text" name="captcha" class="form-control" required>
+                                </div><!--form-group-->
+                            </div><!--col-->
+                        </div><!--row-->
 
                         <div class="row">
                             <div class="col">

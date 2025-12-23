@@ -116,7 +116,7 @@
                 <div class="navbar-header float-left">
                     <a class="navbar-brand text-uppercase" href="{{ url('/') }}">
                         @if( isset($site_logo->value) )
-                       <img src="{{ asset( $site_logo->value ) }}" alt="logo">
+                       <img src="{{ asset('assets/img/logo.png') }}" alt="logo" class="logoimg">
                        @else
                         <img src="{{ asset('assets/img/logo.png') }}" alt="logo" class="logoimg">
                        @endif
@@ -164,7 +164,7 @@
                                     <li class="">
                                         <a href="{{ asset($menu->link) }}"
                                             class="nav-link {{ active_class(Active::checkRoute('frontend.user.dashboard')) }}"
-                                            id="menu-{{ $menu->id }}">{{ trans('custom-menu.' . $menu_name . '.' . str_slug($menu->label)) }}</a>
+                                            id="menu-{{ $menu->id }}">{{ config('app.locale') == 'ar' ? $menu->label_ar : $menu->label  }}</a>
                                     </li>
                                 @else
                                     @if((isset(auth()->user()->employee_type) && auth()->user()->employee_type == 'external') || !auth()->check())
@@ -199,7 +199,7 @@
                             </li>
                         @else
                             <li class="menu-item-has-children ul-li-block px-1 sm-tb-space">
-                                <a href="#!">{{ $logged_in_user->name }}</a>
+                                <a href="#!" class="addminlink">{{ $logged_in_user->name }}</a>
                                 <ul class="sub-menu">
                                     @can('view backend')
                                         <li>

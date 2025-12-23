@@ -16,215 +16,175 @@
 
 @section('content')
 
-    <form name="edit-employee" action="{{ route('admin.employee.update',$teacher->id) }}" method="post" enctype="multipart/form-data">
-        @csrf()
-        @php
-        //dd($teacher);
-        @endphp
-        <div class="pb-3 d-flex justify-content-between align-items-center">
-      <h4 >
-          Edit Trainee
-      </h4>
-     
-          <div class="">
-               <a href="{{ route('admin.teachers.index') }}"
-             class="btn btn-primary">View Trainee</a>
+<form name="edit-employee"
+      action="{{ route('admin.employee.update', $teacher->id) }}"
+      method="POST"
+      enctype="multipart/form-data">
+@csrf
 
-          </div>
-     
-  </div>
-    <div class="card">
-           
-     
-        <div class="card-body">
-            <div class="row">
-                
-                    <div class="col-lg-6 col-sm-12 mt-3">
-                        <div>
+<div class="pb-3 d-flex justify-content-between align-items-center">
+    <h4>Edit Trainee</h4>
+    <a href="{{ route('admin.teachers.index') }}" class="btn btn-primary">View Trainee</a>
+</div>
 
-                            {{ html()->label(__('labels.backend.teachers.fields.first_name'))->class(' form-control-label')->for('first_name') }}
-                        </div>
+<div class="card">
+<div class="card-body">
+<div class="row">
 
-                        <div class="">
-                            <input class="form-control" type="text" name="first_name" id="first_name" placeholder="First Name" value="{{ $teacher->first_name  }}" maxlength="191" required="" autofocus="">
-                        </div><!--col-->
-                    </div><!--form-group-->
+{{-- First Name --}}
+<div class="col-lg-6 col-sm-12 mt-3">
+    <label for="first_name" class="form-control-label">
+        {{ __('labels.backend.teachers.fields.first_name') }}
+    </label>
+    <input class="form-control" type="text" name="first_name" id="first_name"
+           value="{{ $teacher->first_name }}" required>
+</div>
 
-                    <div class="col-lg-6 col-sm-12 mt-3">
-                        <div>
+{{-- Last Name --}}
+<div class="col-lg-6 col-sm-12 mt-3">
+    <label for="last_name" class="form-control-label">
+        {{ __('labels.backend.teachers.fields.last_name') }}
+    </label>
+    <input class="form-control" type="text" name="last_name" id="last_name"
+           value="{{ $teacher->last_name }}" required>
+</div>
 
-                            {{ html()->label(__('labels.backend.teachers.fields.last_name'))->class(' form-control-label')->for('last_name') }}
-                        </div>
+{{-- Email --}}
+<div class="col-lg-6 col-sm-12 mt-3">
+    <label for="email" class="form-control-label">
+        {{ __('labels.backend.teachers.fields.email') }}
+    </label>
+    <input class="form-control" type="email" id="email"
+           value="{{ $teacher->email }}" readonly>
+</div>
 
-                        <div class="">
-                            <input class="form-control" type="text" name="last_name" id="last_name" placeholder="Last Name" value="{{ $teacher->last_name  }}" maxlength="191" required="" autofocus="">
-                        </div><!--col-->
-                    </div><!--form-group-->
-
-                    <div class="col-lg-6 col-sm-12 mt-3">
-                        <div>
-
-                            {{ html()->label(__('labels.backend.teachers.fields.email'))->class(' form-control-label')->for('email') }}
-                        </div>
-
-                        <div class="">
-                            <input class="form-control" type="email" name="email" id="email" placeholder="Email"  value="{{ $teacher->email  }}" readonly maxlength="191" required="" autofocus="">
-                        </div><!--col-->
-                    </div><!--form-group-->
-
-                     <div class="col-lg-6 col-sm-12 mt-3">
-    <div>
-        {{ html()->label(__('labels.backend.teachers.fields.password'))->class('form-control-label')->for('password') }}
-    </div>
+{{-- Password --}}
+<div class="col-lg-6 col-sm-12 mt-3">
+    <label for="password-field" class="form-control-label">
+        {{ __('labels.backend.teachers.fields.password') }}
+    </label>
     <div class="position-relative">
-        {{ html()->password('password')
-            ->class('form-control')
-            ->id('password-field')
-            ->placeholder(__('labels.backend.teachers.fields.password'))
-            ->required() }}
-        
-        <span class="password-toggle" onclick="togglePassword()" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer;">
-            <i class="fa fa-eye" style="color: #ccc;" id="toggle-icon"></i>
+        <input type="password"
+               name="password"
+               id="password-field"
+               class="form-control"
+               placeholder="{{ __('labels.backend.teachers.fields.password') }}">
+
+        <span onclick="togglePassword()"
+              style="position:absolute;top:50%;right:10px;transform:translateY(-50%);cursor:pointer;">
+            <i class="fa fa-eye" id="toggle-icon"></i>
         </span>
     </div>
 </div>
 
-                    <div class="col-lg-6 col-sm-12 mt-3">
-                        <div>
+{{-- Image --}}
+<div class="col-lg-6 col-sm-12 mt-3">
+    <label class="form-control-label">Image</label>
 
-                            {{ html()->label(__('labels.backend.teachers.fields.image'))->class(' form-control-label')->for('image') }}
-                        </div>
+    <div class="custom-file-upload-wrapper">
+        <input type="file" name="image" id="customFileInput" class="custom-file-input">
+        <label for="customFileInput" class="custom-file-label">
+            <i class="fa fa-upload mr-1"></i> Choose a file
+        </label>
+    </div>
 
-                                                                                                     <div class="custom-file-upload-wrapper">
-    <input type="file" name="image" id="customFileInput" class="custom-file-input">
-    <label for="customFileInput" class="custom-file-label">
-        <i class="fa fa-upload mr-1"></i> Choose a file
+    <div class="mt-4">
+        <label class="form-control-label">Uploaded Image</label>
+        <img src="{{ asset('public/uploads/employee/'.$teacher->avatar_location) }}"
+             style="width:100%;">
+    </div>
+</div>
+
+{{-- ID Number --}}
+<div class="col-lg-6 col-sm-12 mt-3">
+    <label class="form-control-label">Id Number</label>
+    <input type="text" name="id_number" class="form-control"
+           value="{{ $teacher->id_number }}">
+</div>
+
+{{-- Classification Number --}}
+<div class="col-lg-6 col-sm-12 mt-3">
+    <label class="form-control-label">Classification Number</label>
+    <input type="text" name="class_number" class="form-control"
+           value="{{ $teacher->classfi_number }}">
+</div>
+
+{{-- Nationality --}}
+<div class="col-lg-6 col-sm-12 mt-3">
+    <label class="form-control-label">Nationality</label>
+    <select name="nationality" class="form-control">
+        <option value="">Select Country</option>
+        @foreach($countries as $country)
+            <option value="{{ $country->id }}"
+                {{ $teacher->nationality == $country->id ? 'selected' : '' }}>
+                {{ $country->name }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
+{{-- DOB --}}
+<div class="col-lg-6 col-sm-12 mt-3">
+    <label class="form-control-label">Date of Birth</label>
+    <input type="date" name="dob" class="form-control" value="{{ $teacher->dob }}">
+</div>
+
+{{-- Mobile --}}
+<div class="col-lg-6 col-sm-12 mt-3">
+    <label class="form-control-label">Mobile Phone</label>
+    <input type="text" name="mobile_number" class="form-control"
+           value="{{ $teacher->phone }}">
+</div>
+
+{{-- Gender --}}
+<div class="col-lg-6 col-sm-12 mt-3">
+    <label class="form-control-label">
+        {{ __('labels.backend.general_settings.user_registration_settings.fields.gender') }}
+    </label><br>
+
+    <label class="mr-3">
+        <input type="radio" name="gender" value="male"
+               {{ $teacher->gender == 'male' ? 'checked' : '' }}>
+        {{ __('validation.attributes.frontend.male') }}
+    </label>
+
+    <label>
+        <input type="radio" name="gender" value="female"
+               {{ $teacher->gender == 'female' ? 'checked' : '' }}>
+        {{ __('validation.attributes.frontend.female') }}
     </label>
 </div>
-<div class="col-lg-12 col-sm-12 mt-3 pl-0">
-    <div class=" form-control-label mt-4" for="image">Uploaded Image</div>
-    <div class="mt-2 " style="width: 100%;">
-       <img src="{{ asset('public/uploads/employee/'.$teacher->avatar_location) }}"  >
-    </div><!--col-->
+
+{{-- Status --}}
+<div class="col-lg-6 col-sm-12 mt-3">
+    <label class="form-control-label">Status</label><br>
+    <label class="custom-control custom-switch">
+        <input type="checkbox"
+               name="active"
+               class="custom-control-input"
+               id="status_switch"
+               value="1"
+               {{ $teacher->active ? 'checked' : '' }}>
+        <span class="custom-control-label"></span>
+    </label>
 </div>
-                    </div>
 
-                    <div class="col-lg-6 col-sm-12 mt-3">
-                        <div class="form-control-div" for="first_name">Id Number</div>
-                        <div class="mt-2">
-                           <input type="text" name="id_number" class="form-control" placeholder="Id Number" value="{{ $teacher->id_number }}">
-                        </div>
-                    </div>
+{{-- Buttons --}}
+<div class="col-12 mt-4 d-flex justify-content-between">
+    <a href="{{ route('admin.teachers.index') }}" class="btn btn-secondary">
+        Cancel
+    </a>
+    <button type="submit" class="btn btn-primary">
+        Update
+    </button>
+</div>
 
-                    <div class="col-lg-6 col-sm-12 mt-3">
-                        <div class=" form-control-div" for="first_name">Classification Number</div>
-                        <div class="mt-2">
-                           <input type="text" class="form-control" name="class_number" placeholder="Classification Number" value="{{ $teacher->classfi_number }}">
-                        </div>
-                    </div>
-
-
-                    <div class="col-lg-6 col-sm-12 mt-3">
-                    <div class=" form-control-div">Nationality</div>
-                        <div class="mt-2 custom-select-wrapper">
-                        <select name="nationality" class="form-control custom-select-box">
-                                <option value="">Select Country</option>
-                                @foreach($countries as $country)
-                                <option value="{{ $country->id }}" {{ $teacher->nationality == $country->id ? 'selected' : '' }}>{{ $country->name }}</option>
-                                @endforeach
-                            </select>
-                             <span class="custom-select-icon">
-        <i class="fa fa-chevron-down"></i>
-    </span>
-                        </div>
-                    </div>
-
-                    <!-- <div class="form-group row">
-                        <label class="col-md-2 form-control-label" for="first_name">Nationality</label>
-                        <div class="col-md-10">
-                           <input type="text" name="nationality" class="form-control" placeholder="Nationality" value="{{ $teacher->nationality }}">
-                        </div>
-                    </div> -->
-
-                    <div class="col-lg-6 col-sm-12 mt-3">
-                        <div class="form-control-div" for="first_name">Date of birth</div>
-                        <div class="mt-2">
-                           <input type="date" name="dob" class="form-control" placeholder="DOB" value="{{ $teacher->dob }}">
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6 col-sm-12 mt-3">
-                        <div class="form-control-div" for="first_name">Mobile phone</div>
-                        <div class="mt-2">
-                           <input type="text" name="mobile_number" class="form-control" placeholder="Mobile phone" value="{{ $teacher->phone }}">
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6 col-sm-12 mt-3">
-                        <div>
-
-                            {{ html()->label(__('labels.backend.general_settings.user_registration_settings.fields.gender'))->class('form-control-label')->for('gender') }}
-                        </div>
-                        <div class="">
-                            <label class="radio-inline mr-3 mb-0">
-                                <input type="radio" name="gender" value="male" {{ $teacher->gender == 'male'?'checked':'' }}> {{__('validation.attributes.frontend.male')}}
-                            </label>
-                            <label class="radio-inline mr-3 mb-0">
-                                <input type="radio" name="gender" value="female" {{ $teacher->gender == 'female'?'checked':'' }}> {{__('validation.attributes.frontend.female')}}
-                            </label>
-                            <!-- <label class="radio-inline mr-3 mb-0">
-                                <input type="radio" name="gender" value="other" {{ $teacher->gender == 'other'?'checked':'' }}> {{__('validation.attributes.frontend.other')}}
-                            </label> -->
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6 col-sm-12 mt-3">
-                        <div>
-
-                            {{ html()->label(__('labels.backend.teachers.fields.status'))->class('form-control-label')->for('active') }}
-                        </div>
-                        <div class="custom-control custom-switch">
-                <input type="checkbox" 
-                       class="custom-control-input status-toggle" 
-                       id="switch" 
-                       data-id="" 
-                       value="1">
-                <label class="custom-control-label" for="switch"></label>
-            </div>
-
-                    </div>
-                   
-                         <div class="col-12 mt-3">
-                            <div class="d-flex justify-content-between">
-
-                                <div class="mr-4">
-    
-                                    {{ form_cancel(route('admin.teachers.index'), __('buttons.general.cancel')) }}
-                                </div>
-                                <div>
-    
-                                    {{ form_submit(__('buttons.general.crud.update')) }}
-                                </div>
-                            </div>
-
-                        </div>
-                       
-                  
-
-                    <!-- <div class="form-group row justify-content-center">
-                        <div class="col-4">
-                            {{ form_cancel(route('admin.teachers.index'), __('buttons.general.cancel')) }}
-                            {{ form_submit(__('buttons.general.crud.update')) }}
-                        </div>
-                    </div> -->
-                    <!--col-->
-                
-            </div>
-        </div>
-
-    </div>
-    </form>
+</div>
+</div>
+</div>
+</form>
 @endsection
+
 @push('after-scripts')
     <script>
         $(document).on('change', '#payment_method', function(){
