@@ -35,25 +35,26 @@ class Media extends Model
        
         if (!$awsPath || !Auth::check()) return null;
 
+        $storage = config('filesystems.default');
 
-        if($type == 'upload') {
-            // return Cache::remember("video_signed_url_{$this->id}", 55, function () use ($awsPath) {
-            //     return Storage::disk('s3')->temporaryUrl(
-            //         $awsPath,
-            //         now()->addMinutes(50)
-            //     );
-            // });
-            return Storage::disk('s3')->temporaryUrl(
-                    $awsPath,
-                    now()->addMinutes(60)
-            );
-            //return $awsPath;
+        if( $storage == 'local') {
+            return $this->aws_url;
         } else {
-             return Storage::disk('s3')->temporaryUrl(
-                    $awsPath,
-                    now()->addMinutes(60)
-            );
+            
+            if($type == 'upload') {
+                return Storage::disk('s3')->temporaryUrl(
+                        $awsPath,
+                        now()->addMinutes(60)
+                );
+                //return $awsPath;
+            } else {
+                return Storage::disk('s3')->temporaryUrl(
+                        $awsPath,
+                        now()->addMinutes(60)
+                );
+            }
         }
+
         
     }
 
