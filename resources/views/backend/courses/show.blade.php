@@ -53,148 +53,155 @@
 </div>
     <div class="card">
 
-        <!-- <div class="card-header">
-            
-            <h3 class="page-title mb-0">@lang('labels.backend.courses.title')</h3>
-        </div> -->
         <div class="card-body">
-            <div class="row">
-                <div class="col-12">
-                    <table class="table table-bordered table-striped">
-                        <tr>
-                            <th>@lang('labels.backend.courses.fields.teachers')</th>
-                            <td>
-                                @foreach ($course->teachers as $singleTeachers)
-                                    <span class="label label-info label-many">{{ $singleTeachers->name }}</span>
-                                @endforeach
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>@lang('labels.backend.courses.fields.title')</th>
-                            <td>
-                                @if($course->published == 1)
-                                    <a target="_blank"
-                                       href="{{ route('courses.show', [$course->slug]) }}">{{ $course->title }}</a>
-                                @else
-                                    {{ $course->title }}
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>@lang('labels.backend.courses.fields.slug')</th>
-                            <td>{{ $course->slug }}</td>
-                        </tr>
-                        <tr>
-                            <th>@lang('labels.backend.courses.fields.category')</th>
-                            <td>{{ $course->category->name }}</td>
-                        </tr>
-                        <tr>
-                            <th>@lang('labels.backend.courses.fields.description')</th>
-                            <td>{!! $course->description !!}</td>
-                        </tr>
-                        <!--tr>
-                            <th>@lang('labels.backend.courses.fields.price')</th>
-                            <td>{{ ($course->free == 1) ? trans('labels.backend.courses.fields.free') : $course->price.' '.$appCurrency['symbol'] }}</td>
-                        </tr-->
-                        <tr>
-                            <th>@lang('labels.backend.courses.fields.course_image')</th>
-                            <td>@if($course->course_image)<a
-                                        href="{{ asset('storage/uploads/' . $course->course_image) }}"
-                                        target="_blank"><img
-                                            src="{{ asset('storage/uploads/' . $course->course_image) }}"
-                                            height="50px"/></a>@endif</td>
-                        </tr>
-                        <tr>
-                            <th>@lang('labels.backend.lessons.fields.media_video')</th>
-                            <td>
-                                @if($course->mediaVideo !=  null )
-                                    <p class="form-group mb-0">
-                                        <a href="{{$course->mediaVideo->url}}"
-                                           target="_blank">{{$course->mediaVideo->url}}</a>
-                                    </p>
-                                @else
-                                    <p>No Videos</p>
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>@lang('labels.backend.courses.fields.start_date')</th>
-                            <td>{{ $course->start_date }}</td>
-                        </tr>
-                        <tr>
-                            <th>@lang('labels.backend.courses.fields.expire_at')</th>
-                            <td>{{ $course->expire_at }}</td>
-                        </tr>
-                        <tr>
-                            <th>@lang('labels.backend.courses.fields.published')</th>
-                            <td>{{ Form::checkbox("published", 1, $course->published == 1 ? true : false, ["disabled"]) }}</td>
-                        </tr>
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-bordered table-striped">
 
-                        <!--tr>
-                            <th>@lang('labels.backend.courses.fields.meta_title')</th>
-                            <td>{{ $course->meta_title }}</td>
-                        </tr>
-                        <tr>
-                            <th>@lang('labels.backend.courses.fields.meta_description')</th>
-                            <td>{{ $course->meta_description }}</td>
-                        </tr>
-                        <tr>
-                            <th>@lang('labels.backend.courses.fields.meta_keywords')</th>
-                            <td>{{ $course->meta_keywords }}</td>
-                        </tr-->
-                    </table>
-                </div>
-            </div><!-- Nav tabs -->
+                {{-- Teachers --}}
+                <tr>
+                    <th>@lang('labels.backend.courses.fields.teachers')</th>
+                    <td>
+                        @forelse ($course->teachers ?? [] as $singleTeacher)
+                            <span class="badge badge-info">{{ $singleTeacher->name }}</span>
+                        @empty
+                            <span class="text-muted">No Teachers</span>
+                        @endforelse
+                    </td>
+                </tr>
 
-            @if(count($courseTimeline) > 0)
-                <div class="row justify-content-center">
-                    <div class="col-lg-8 col-12  ">
-                        <h4 class="">@lang('labels.backend.courses.course_timeline')</h4>
-                        <p class="mb-0">@lang('labels.backend.courses.listing_note')</p>
-                        <p class="">@lang('labels.backend.courses.timeline_description')</p>
-                        <ul class="sorter d-inline-block">
+                {{-- Title --}}
+                <tr>
+                    <th>@lang('labels.backend.courses.fields.title')</th>
+                    <td>
+                        @if($course->published)
+                            <a target="_blank"
+                               href="{{ route('courses.show', $course->slug) }}">
+                                {{ $course->title }}
+                            </a>
+                        @else
+                            {{ $course->title }}
+                        @endif
+                    </td>
+                </tr>
 
-                            @foreach($courseTimeline as $key=>$item)
+                {{-- Slug --}}
+                <tr>
+                    <th>@lang('labels.backend.courses.fields.slug')</th>
+                    <td>{{ $course->slug }}</td>
+                </tr>
 
-                                @if(isset($item->model) && $item->model->published == 1)
+                {{-- Category (NULL SAFE) --}}
+                <tr>
+                    <th>@lang('labels.backend.courses.fields.category')</th>
+                    <td>{{ optional($course->category)->name ?? '-' }}</td>
+                </tr>
 
-                                    <li>
-                                        <span data-id="{{$item->id}}" data-sequence="{{$item->sequence}}">
-                                    @if($item->model_type == 'App\Models\Test')
-                                        <p class="d-inline-block mb-0 btn btn-primary">
-                                            @lang('labels.backend.courses.test')
-                                         </p>
-                                    @elseif($item->model_type == 'App\Models\Lesson')
-                                        @if($item->model->live_lesson)
-                                            <p class="d-inline-block mb-0 btn btn-info">
-                                                @lang('labels.backend.live_lessons.title')
-                                            </p>
-                                        @else
-                                        <p class="d-inline-block mb-0 btn btn-success">
-                                            @lang('labels.backend.courses.lesson')
-                                        </p>
-                                        @endif
-                                     @endif
-                                    @if($item->model)
-                                    <p class="title d-inline ml-2">{{$item->model->title}}</p>
-                                    @endif
-                                     </span>
+                {{-- Description --}}
+                <tr>
+                    <th>@lang('labels.backend.courses.fields.description')</th>
+                    <td>{!! $course->description !!}</td>
+                </tr>
 
-                                    </li>
-                                @endif
-                            @endforeach
-                        </ul>
-                        <a href="{{ route('admin.courses.index') }}"
-                           class="cancel-btn border float-left">@lang('strings.backend.general.app_back_to_list')</a>
+                {{-- Course Image --}}
+                <tr>
+                    <th>@lang('labels.backend.courses.fields.course_image')</th>
+                    <td>
+                        @if(!empty($course->course_image))
+                            <a href="{{ asset('storage/uploads/' . $course->course_image) }}" target="_blank">
+                                <img src="{{ asset('storage/uploads/' . $course->course_image) }}" height="50">
+                            </a>
+                        @else
+                            <span class="text-muted">No Image</span>
+                        @endif
+                    </td>
+                </tr>
 
-                        <a href="#" id="save_timeline"
-                           class="btn btn-primary float-right">@lang('labels.backend.courses.save_timeline')</a>
+                {{-- Video --}}
+                <tr>
+                    <th>@lang('labels.backend.lessons.fields.media_video')</th>
+                    <td>
+                        @if(optional($course->mediaVideo)->url)
+                            <a href="{{ $course->mediaVideo->url }}" target="_blank">
+                                {{ $course->mediaVideo->url }}
+                            </a>
+                        @else
+                            <span class="text-muted">No Videos</span>
+                        @endif
+                    </td>
+                </tr>
 
-                    </div>
+                {{-- Dates --}}
+                <tr>
+                    <th>@lang('labels.backend.courses.fields.start_date')</th>
+                    <td>{{ $course->start_date ?? '-' }}</td>
+                </tr>
 
-                </div>
-            @endif
+                <tr>
+                    <th>@lang('labels.backend.courses.fields.expire_at')</th>
+                    <td>{{ $course->expire_at ?? '-' }}</td>
+                </tr>
+
+                {{-- Published (Form::checkbox REMOVED) --}}
+                <tr>
+                    <th>@lang('labels.backend.courses.fields.published')</th>
+                    <td>
+                        <input type="checkbox" disabled {{ $course->published ? 'checked' : '' }}>
+                    </td>
+                </tr>
+
+            </table>
         </div>
+    </div>
+
+    {{-- Timeline --}}
+    @if(!empty($courseTimeline) && count($courseTimeline) > 0)
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-12">
+                <h4>@lang('labels.backend.courses.course_timeline')</h4>
+                <p class="mb-0">@lang('labels.backend.courses.listing_note')</p>
+                <p>@lang('labels.backend.courses.timeline_description')</p>
+
+                <ul class="sorter d-inline-block">
+                    @foreach($courseTimeline as $item)
+                        @if(optional($item->model)->published)
+                            <li>
+                                <span data-id="{{ $item->id }}" data-sequence="{{ $item->sequence }}">
+
+                                    @if($item->model_type === 'App\Models\Test')
+                                        <span class="btn btn-primary btn-sm">
+                                            @lang('labels.backend.courses.test')
+                                        </span>
+
+                                    @elseif($item->model_type === 'App\Models\Lesson')
+                                        <span class="btn {{ $item->model->live_lesson ? 'btn-info' : 'btn-success' }} btn-sm">
+                                            {{ $item->model->live_lesson
+                                                ? __('labels.backend.live_lessons.title')
+                                                : __('labels.backend.courses.lesson') }}
+                                        </span>
+                                    @endif
+
+                                    <span class="ml-2">{{ optional($item->model)->title }}</span>
+                                </span>
+                            </li>
+                        @endif
+                    @endforeach
+                </ul>
+
+                <a href="{{ route('admin.courses.index') }}"
+                   class="btn btn-secondary float-left">
+                    @lang('strings.backend.general.app_back_to_list')
+                </a>
+
+                <a href="#" id="save_timeline"
+                   class="btn btn-primary float-right">
+                    @lang('labels.backend.courses.save_timeline')
+                </a>
+            </div>
+        </div>
+    @endif
+</div>
+
     </div>
 @stop
 

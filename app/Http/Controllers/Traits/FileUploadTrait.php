@@ -465,8 +465,13 @@ trait FileUploadTrait
 
                     //dd($filename);
                     $storage = config('filesystems.default');
+
+                    $url = null;
+
                     if( $storage == 'local') {
-                        $aws_url = Storage::disk('s3')->url("videos/{$filename}");
+                        $file->move($uploadPath, $filename);
+                        $aws_url = asset('storage/uploads/' . $filename);
+                        $url = asset('storage/uploads/' . $filename);
                     } else {
                         $aws_url = CustomHelper::uploadToS3($file, $filename, null);
                     }

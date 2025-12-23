@@ -36,13 +36,7 @@
             <div class="" >
            
     
-        <!-- <div class="card-header">
-            <h3 class="page-title d-inline mb-0">Trainees</h3>
-            <div class="float-right">
-                <a href="{{ route('admin.employee.index') }}"
-                   class="btn btn-success">View Trainees</a>
-            </div>
-        </div> -->
+        
         <div class="card-body">
             <div class="row">
                 <div class="col-12">
@@ -91,8 +85,8 @@
                             <td>{!! $teacher->gender !!}</td>
                         </tr>
                         @php
-                            $teacherProfile = $teacher->teacherProfile?:'';
-                            $payment_details = $teacher->teacherProfile?json_decode($teacher->teacherProfile->payment_details):new stdClass();
+                            // $teacherProfile = $teacher->teacherProfile?:'';
+                            // $payment_details = $teacher->teacherProfile?json_decode($teacher->teacherProfile->payment_details):new stdClass();
                         @endphp
                     </table>
                     @else
@@ -130,8 +124,8 @@
                             <td>{!! $teacher->gender !!}</td>
                         </tr>
                         @php
-                            $teacherProfile = $teacher->teacherProfile?:'';
-                            $payment_details = $teacher->teacherProfile?json_decode($teacher->teacherProfile->payment_details):new stdClass();
+                            // $teacherProfile = $teacher->teacherProfile?:'';
+                            // $payment_details = $teacher->teacherProfile?json_decode($teacher->teacherProfile->payment_details):new stdClass();
                         @endphp
                     </table>
                     @endif

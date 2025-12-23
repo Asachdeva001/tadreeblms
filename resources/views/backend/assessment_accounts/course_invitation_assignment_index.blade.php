@@ -141,7 +141,8 @@
                 searching: false,
                 //ajax: "/user/course-invitation-list",
                 ajax: {
-                    url: "/user/course-invitation-list",
+                    //url: "/user/course-invitation-list",
+                    url: "{{ route('admin.assessment_accounts.course-invitation-list') }}",
                     type: "GET",
                     data: function (d) {
                         d.user_id = user_id;

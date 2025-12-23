@@ -136,8 +136,47 @@
         window._token = '{{ csrf_token() }}';
     </script>
 
+    <script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
+    <script>
+    CKEDITOR.config.versionCheck = false;
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof CKEDITOR !== 'undefined') {
+            document.querySelectorAll('.editor').forEach(el => {
+                CKEDITOR.replace(el);
+            });
+        }
+    });
 
+    document.addEventListener('DOMContentLoaded', function () {
 
+        if (typeof CKEDITOR === 'undefined') {
+            console.error('CKEditor not loaded');
+            return;
+        }
+
+        $('.editor').each(function () {
+            let id = $(this).attr('id');
+
+            // CKEditor REQUIRES an ID
+            if (!id) {
+                id = 'editor_' + Math.random().toString(36).substr(2, 9);
+                $(this).attr('id', id);
+            }
+
+            CKEDITOR.replace(id, {
+                filebrowserImageBrowseUrl: '/laravel-filemanager?type=Images',
+                filebrowserImageUploadUrl: '/laravel-filemanager/upload?type=Images&_token={{ csrf_token() }}',
+                filebrowserBrowseUrl: '/laravel-filemanager?type=Files',
+                filebrowserUploadUrl: '/laravel-filemanager/upload?type=Files&_token={{ csrf_token() }}',
+                extraPlugins: 'smiley,lineutils,widget,codesnippet,prism,colorbutton,colordialog'
+            });
+        });
+
+    });
+
+    </script>
 
     @stack('after-scripts')
 
