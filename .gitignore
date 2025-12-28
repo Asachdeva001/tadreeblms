@@ -31,7 +31,7 @@ storage/logs/*.log
 
 /storage/framework/sessions/*
 
-installed
+/installed
 
 # Composer cache (PREVENT 100MB FILES)
 .composer/
