@@ -13,6 +13,7 @@ use App\Repositories\Backend\Auth\PermissionRepository;
 use App\Http\Requests\Backend\Auth\User\StoreUserRequest;
 use App\Http\Requests\Backend\Auth\User\ManageUserRequest;
 use App\Http\Requests\Backend\Auth\User\UpdateUserRequest;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * Class UserController.
@@ -179,15 +180,32 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        
-        $this->userRepository->update($user, $request->only(
+
+        $data = $request->only(
             'first_name',
             'last_name',
             'email',
             'roles',
             'permissions',
             'employee_type'
-        ));
+        );
+       // Update password ONLY if user chose to change it
+        if ($request->boolean('change_password') && $request->filled('password')) {
+            $data['password'] = Hash::make( $request->password );
+            //dd($data['password'], $request->password);
+        }
+
+        //dd();
+
+        $this->userRepository->update($user, $data);
+        // $this->userRepository->update($user, $request->only(
+        //     'first_name',
+        //     'last_name',
+        //     'email',
+        //     'roles',
+        //     'permissions',
+        //     'employee_type'
+        // ));
 
         return redirect()->route('admin.auth.user.index')->withFlashSuccess(__('alerts.backend.users.updated'));
     }

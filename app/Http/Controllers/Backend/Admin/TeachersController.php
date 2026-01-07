@@ -206,7 +206,7 @@ class TeachersController extends Controller
     {
         //        $request = $this->saveFiles($request);
 
-        $teacher = User::findOrFail($id);
+        $teacher = User::with('teacherProfile')->findOrFail($id);
         $teacher->update($request->except('email'));
         if ($request->has('image')) {
             $teacher->avatar_type = 'storage';
@@ -220,6 +220,9 @@ class TeachersController extends Controller
         $teacher->classfi_number = $request->classfi_number;
         $teacher->nationality = $request->nationality;
         $teacher->active = isset($request->active) ? 1 : 0;
+
+        
+
         $teacher->save();
 
         /*
@@ -240,7 +243,12 @@ class TeachersController extends Controller
             //'payment_details'   => json_encode($payment_details),
             'description'       => request()->description,
         ];
-        $teacher->teacherProfile->update($data);
+       
+        if ($teacher->teacherProfile) {
+            $teacher->teacherProfile->update($data);
+        } else {
+            $teacher->teacherProfile()->create($data);
+        }
 
 
         return redirect()->route('admin.teachers.index')->withFlashSuccess(trans('alerts.backend.general.updated'));

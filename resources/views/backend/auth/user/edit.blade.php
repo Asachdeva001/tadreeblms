@@ -87,6 +87,58 @@
                 </div>
             </div>
 
+                <!-- Change Password Toggle -->
+                <div class="form-group row">
+                    <div class="col-md-10 offset-md-2">
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                type="checkbox"
+                                id="change_password"
+                                name="change_password"
+                                onchange="togglePasswordFields()">
+                            <label class="form-check-label" for="change_password">
+                                Want to edit password?
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group row d-none" id="password-section">
+                    <label class="col-md-2 form-control-label">
+                        @lang('validation.attributes.backend.access.users.password')
+                    </label>
+                    <div class="col-md-10 position-relative">
+                        <input type="text"
+                            name="password"
+                            id="password-field"
+                            class="form-control"
+                            placeholder="Enter new password">
+                    </div>
+                </div>
+
+                <!-- Password Confirmation -->
+                {{-- <div class="form-group row d-none" id="password-confirm-section">
+                    <label class="col-md-2 form-control-label">
+                        @lang('validation.attributes.backend.access.users.password_confirmation')
+                    </label>
+                    <div class="col-md-10">
+                        <input type="password"
+                            name="password_confirmation"
+                            class="form-control"
+                            placeholder="Confirm new password">
+                    </div>
+                </div> --}}
+
+    <div class="pb-3 d-flex justify-content-between">
+        <h4>
+            @lang('labels.backend.access.users.management')
+            <small class="text-muted ml-3">
+                @lang('labels.backend.access.users.edit')
+            </small>
+        </h4>
+    </div>
+
             {{-- Roles --}}
             <div class="form-group row">
                 <label class="col-md-2 form-control-label">Abilities</label>
@@ -156,3 +208,35 @@
 
 </form>
 @endsection
+@push('after-scripts')
+<script>
+    function togglePassword() {
+        var passwordField = document.getElementById("password-field");
+        var icon = document.getElementById("toggle-icon");
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        } else {
+            passwordField.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    }
+
+    
+    function togglePasswordFields() {
+        const checked = document.getElementById('change_password').checked;
+
+        document.getElementById('password-section').classList.toggle('d-none', !checked);
+        document.getElementById('password-confirm-section').classList.toggle('d-none', !checked);
+
+        if (!checked) {
+            document.getElementById('password-field').value = '';
+            document.querySelector('[name="password_confirmation"]').value = '';
+        }
+    }
+
+
+</script>
+@endpush
