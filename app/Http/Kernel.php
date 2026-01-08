@@ -4,12 +4,10 @@ namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use Illuminate\Session\Middleware\StartSession;
-//use Spatie\Permission\Middlewares\PermissionMiddleware as MiddlewarePermissionMiddleware;
-//use Spatie\Permission\Middlewares\RoleMiddleware as MiddlewareRoleMiddleware;
-//use Spatie\Permission\Middlewares\RoleOrPermissionMiddleware as MiddlewareRoleOrPermissionMiddleware;
-//use Spatie\Permission\Middlewares\RoleMiddleware;
-//use Spatie\Permission\Middlewares\PermissionMiddleware;
-//use Spatie\Permission\Middlewares\RoleOrPermissionMiddleware;
+
+use Spatie\Permission\Middlewares\RoleMiddleware;
+use Spatie\Permission\Middlewares\PermissionMiddleware;
+use Spatie\Permission\Middlewares\RoleOrPermissionMiddleware;
 /**
  * Class Kernel.
  */
@@ -87,9 +85,9 @@ class Kernel extends HttpKernel
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'password_expires' => \App\Http\Middleware\PasswordExpires::class,
-        //'role' => MiddlewareRoleMiddleware::class,
-        //'permission' => MiddlewarePermissionMiddleware::class,
-        //'role_or_permission' => MiddlewareRoleOrPermissionMiddleware::class,
+        'role' => RoleMiddleware::class,
+        'permission' => PermissionMiddleware::class,
+        'role_or_permission' => RoleOrPermissionMiddleware::class,
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,

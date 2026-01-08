@@ -20952,15 +20952,6 @@
         {
                         return \Illuminate\Routing\Route::permission($permissions);
         }
-                    /**
-         * @see \Spatie\Permission\PermissionServiceProvider::registerMacroHelpers()
-         * @param mixed $rolesOrPermissions
-         * @static
-         */ 
-        public static function roleOrPermission($rolesOrPermissions = [])
-        {
-                        return \Illuminate\Routing\Route::roleOrPermission($rolesOrPermissions);
-        }
          
     }
      
