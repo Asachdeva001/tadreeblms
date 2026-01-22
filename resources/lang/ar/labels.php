@@ -470,6 +470,7 @@ return array(
     ),
     'general_settings' =>
     array(
+      'disable_landing_page' => 'تعطيل الصفحة المقصودة',
       'custom_css' => 'لغة تنسيق ويب حسب الطلب',
       'custom_js' => 'شبيبة مخصصة',
       'app_locale' => 'لغة التطبيق',

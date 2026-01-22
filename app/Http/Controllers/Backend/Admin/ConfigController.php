@@ -97,24 +97,48 @@ class ConfigController extends Controller
             }
         }
 
+        //dd($switchInputs, $requests);
+
         foreach ($requests as $key => $value) {
-            if ($key != '_token') {
-                $key = str_replace('__', '.', $key);
-                $lang = request()->lang ?? 'en';
-                $config = Config::firstOrCreate(['key' => $key, 'lang' => $lang]);
-                $config->value = $value;
-                $config->save();
+            if ($key === '_token') {
+                continue;
+            }
+            
+            $key = str_replace('__', '.', $key);
+            $lang = request()->lang ?? 'en';
+            $config = Config::firstOrCreate(['key' => $key, 'lang' => $lang]);
+            $config->value = $value;
+            $config->save();
 
                 
 
-                if ($key === 'app.locale') {
-                    Locale::where('short_name', '!=', $value)->update(['is_default' => 0]);
-                    $locale = Locale::where('short_name', '=', $value)->first();
-                    $locale->is_default = 1;
-                    $locale->save();
-                }
+            if ($key === 'app.locale') {
+                Locale::where('short_name', '!=', $value)->update(['is_default' => 0]);
+                $locale = Locale::where('short_name', '=', $value)->first();
+                $locale->is_default = 1;
+                $locale->save();
             }
+            
         }
+
+        //dd($requests);
+
+        return back()->withFlashSuccess(__('alerts.backend.general.updated'));
+    }
+
+    public function saveLandingPageGeneralSettings(Request $request)
+    {
+        //dd($request->all());
+       
+        
+        $value = $request->has('landing_page_toggle') ? 1 : 0;
+
+        Config::updateOrCreate(
+            ['key' => 'landing_page_toggle'],
+            ['value' => $value]
+        );
+            
+
         return back()->withFlashSuccess(__('alerts.backend.general.updated'));
     }
 
@@ -129,6 +153,8 @@ class ConfigController extends Controller
         $footer_data = Config::where('key', '=', 'footer_data')->first();
 
         $logo_data = Config::where('key', '=', 'site_logo')->first();
+
+        $landing_page_toggle = Config::where('key', 'landing_page_toggle')->value('value') ?? 0;
 
         $footer_data = json_decode($footer_data->value);
         $sections = json_decode($sections->value);
@@ -158,7 +184,7 @@ class ConfigController extends Controller
 
         $slides_list = Slider::OrderBy('sequence','asc')->get();
 
-        return view('backend.settings.landing_page_setting', compact('slides_list','menu', 'menu_data', 'menu_list', 'pages','logo_data', 'sections', 'footer_data', 'app_locales', 'api_clients', 'our_vision', 'our_mission'));
+        return view('backend.settings.landing_page_setting', compact('landing_page_toggle','slides_list','menu', 'menu_data', 'menu_list', 'pages','logo_data', 'sections', 'footer_data', 'app_locales', 'api_clients', 'our_vision', 'our_mission'));
     }
 
     public function getSocialSettings()

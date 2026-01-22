@@ -400,6 +400,7 @@ return array(
     'general_settings' =>
     array(
       'title' => 'General',
+      'disable_landing_page' => 'Disable Landing Page',
       'contact' =>
       array(
         'short_text' => 'Short Text',

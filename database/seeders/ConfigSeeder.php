@@ -98,7 +98,8 @@ class ConfigSeeder extends Seeder
             'sitemap.chunk' => 500,
             'one_signal' => 0,
             'our_mission' => 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet ipsum dolor sit amet, consectetuer adipiscing elit.',
-            'our_vision' => 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet ipsum dolor sit amet, consectetuer adipiscing elit.'
+            'our_vision' => 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet ipsum dolor sit amet, consectetuer adipiscing elit.',
+            'landing_page_toggle' => 1
         ];
 
         foreach ($data as $key => $value) {

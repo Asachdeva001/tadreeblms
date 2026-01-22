@@ -56,6 +56,9 @@
             padding: 15px;
         }
     }
+    .row.justify-content-center.align-items-center {
+        background: #f9f9f4;
+    }
 
 </style>
 <?php
@@ -78,7 +81,7 @@
                     <h2>@lang('labels.frontend.modal.my_account')</h2>
                     <p>@lang('Login to continue')</p>
                 </div>
-                <button type="button" class="close modal_close" data-dismiss="modal" aria-hidden="true">×</button>
+                <button type="button" class="close modal_close" aria-hidden="true">×</button>
             </div>
 
             <!-- Modal body -->
@@ -96,6 +99,7 @@
                             @csrf
 
                             <input type="hidden" name="redirect_url" id="redirect_url">
+                            <input type="text" name="active_page" class="active_page" value="{{ Route::currentRouteName() }}">
 
                             <div class="contact-info mb-2">
                                 <input type="email" name="email" class="form-control mb-0"
@@ -154,7 +158,7 @@
                     <p>@lang('Please register an user as administrator')</p>
                     @endif
                 </div>
-                <button type="button" class="close modal_close" data-dismiss="modal" aria-hidden="true">×</button>
+                <button type="button" class="close modal_close" aria-hidden="true">×</button>
             </div>
 
             <!-- Body -->
@@ -169,6 +173,9 @@
                             @if($default_admin_email->email == 'admin@seeder.com')
                             <input type="hidden" name="default_admin" value="1" />
                             @endif
+
+                            <input type="text" name="active_page" class="active_page" value="{{ Route::currentRouteName() }}">
+
                             <div class="contact-info mb-2">
                                 <input type="text" name="first_name" class="form-control mb-0"
                                        maxlength="191"
@@ -297,8 +304,26 @@
         </script>
     @endif
 
+        
 
         <script>
+
+
+            function reloadIfDifferent(targetRoute) {
+                const currentRoute = $('.active_page').val();
+
+                if (currentRoute == targetRoute) {
+                    location.reload();
+                }
+            }
+
+            $(document).on('click', '.modal_close', function () {
+                $(this).closest('.modal').modal('hide');
+                reloadIfDifferent('frontend.auth.login');
+            });
+
+
+
              hrefurl=$(location).attr("href");
                 last_part=hrefurl.substr(hrefurl.lastIndexOf('/') + 1)
         // console.log(last_part);
