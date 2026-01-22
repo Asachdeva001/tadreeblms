@@ -293,7 +293,9 @@ class CoursesController extends Controller
             //     return $view;
             // })
             ->addColumn('actions', function ($q) use ($has_view, $has_edit, $has_delete, $request) {
-        $actions = '<div class="action-pill">';
+        $actions = '<div class="actionbtns">
+        
+        ';
 
         if ($request->show_deleted == 1) {
             return view('backend.datatable.action-trashed')->with([
@@ -357,11 +359,13 @@ class CoursesController extends Controller
            
             <div class="">
             
-                <a class="btn btn-outline-success" href="' . route('admin.lessons.create', ['course_id' => $q->id]) . '">
-                    <i class="fa fa-plus-circle" aria-hidden="true" style="font-size:20px"></i>
+                <a class="createbtn" href="' . route('admin.lessons.create', ['course_id' => $q->id]) . '">
+                Create
+                   <!-- <i class="fa fa-plus-circle" aria-hidden="true" style="font-size:20px"></i> -->
                 </a>
-                <a class="add-btn" style="padding:7px 20px 11px 20px" href="' . route('admin.lessons.index', ['course_id' => $q->id]) . '">
-                    <i class="fa fa-eye" aria-hidden="true" style="font-size:18px margin-bottom:-3px"></i>
+                <a class="viewbtn" href="' . route('admin.lessons.index', ['course_id' => $q->id]) . '">
+                View
+                   <!-- <i class="fa fa-eye" aria-hidden="true" style="font-size:18px margin-bottom:-3px"></i> -->
                 </a>
             </div>
         ';
@@ -383,16 +387,17 @@ class CoursesController extends Controller
     $total_tests = $q->total_tests_published()->count();
 
    if ($total_tests == 0) {
-        return '<a class="btn btn-outline-success" href="' . route('admin.tests.create', ['course_id' => $q->id]) . '">
-              <i class="fa fa-plus-square" aria-hidden="true" style="font-size:20px;margin-bottom:-3px"></i>  <span style="">
+        return '<a class="btn2" href="' . route('admin.tests.create', ['course_id' => $q->id]) . '">
+            <!--  <i class="fa fa-plus-square" aria-hidden="true" style="font-size:20px;margin-bottom:-3px"></i> --> 
                    Add Test
-                   </span>
+                   
                 </a>';
     } else {
-        return '<a class="add-btn" style="padding:7px 20px 11px 20px" href="' . route('admin.tests.index', ['course_id' => $q->id]) . '">
-                  <span style="">
+        return '<a class="btn2" href="' . route('admin.tests.index', ['course_id' => $q->id]) . '">
+                  
                    (' . $total_tests . ') 
-                   </span>  <i class="fa fa-eye ml-1" aria-hidden="true" style="font-size:13px;margin-bottom:-1px"></i> 
+                   <span >View Tests</span>
+                  <!-- <i class="fa fa-eye ml-1" aria-hidden="true" style="font-size:13px;margin-bottom:-1px"></i>  -->
                 </a>';
     }
 })
@@ -409,7 +414,7 @@ class CoursesController extends Controller
 
     $html = '
         <a href="javascript:void(0);" data-toggle="modal" data-target="#' . $modalId . '">
-            <i class="fa fa-qrcode ml-3" style="font-size:20px;color:#3c4085"></i>
+            <i class="fa fa-qrcode" style="font-size:20px;color:#3c4085"></i>
         </a>
 
         <!-- Modal -->
@@ -465,7 +470,7 @@ class CoursesController extends Controller
             })
             ->addColumn('total_students_enrolled', function ($q) {
 
-                return '<a class="add-btn" style="padding:7px 20px 11px 20px"  href="' . route('admin.enrolled_student', ['course_id' => $q->id]) . '"> (' . CustomHelper::totalEnrolled($q->id) . ') <i class="fa fa-eye ml-1" aria-hidden="true"></i> </a>';
+                return '<a class="viewiconbtn"  href="' . route('admin.enrolled_student', ['course_id' => $q->id]) . '"> (' . CustomHelper::totalEnrolled($q->id) . ') <br>   <i class="fa fa-eye ml-1" aria-hidden="true"></i>   </a>';
             })
             ->addColumn('department', function ($q) {
                 return $q->getDepartment($q->department_id);
