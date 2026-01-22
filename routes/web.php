@@ -78,6 +78,9 @@ require_once "delta_academy_custom_routes.php";
 Route::group(['namespace' => 'Frontend', 'as' => 'frontend.'], function () {
     include_route_files(__DIR__ . '/frontend/');
 });
+Route::get('/refresh-captcha', [\App\Http\Controllers\Frontend\Auth\LoginController::class, 'refreshCaptcha'])
+    ->name('refresh.captcha');
+
 
 /*
  * Backend Routes

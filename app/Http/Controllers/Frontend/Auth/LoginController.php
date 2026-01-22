@@ -66,6 +66,18 @@ class LoginController extends Controller
             'captha' => $captha_string
         ]);
     }
+    public function refreshCaptcha()
+    {
+        $a = rand(1, 9);
+        $b = rand(1, 9);
+
+        Session::put('captcha_answer', $a + $b);
+
+        return response()->json([
+            'captcha_question' => "$a + $b = ?"
+        ]);
+    }
+
 
     /**
      * Get login username field
@@ -137,13 +149,32 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, $user)
     {
+        
+        if (!$user->isConfirmed()) {
+
         // Confirmation & active checks
         if (! $user->isConfirmed()) {
             auth()->logout();
             throw new GeneralException(__('exceptions.frontend.auth.confirmation.pending'));
         }
 
+
+            if ($user->isPending()) {
+                throw new GeneralException(__('exceptions.frontend.auth.confirmation.pending'));
+            }
+
+            throw new GeneralException(
+                __('exceptions.frontend.auth.confirmation.resend', [
+                    'url' => route(
+                        'frontend.auth.account.confirm.resend',
+                        $user->{$user->getUuidName()}
+                    )
+                ])
+            );
+        } elseif (!$user->isActive()) {
+
         if (! $user->isActive()) {
+
             auth()->logout();
             throw new GeneralException(__('exceptions.frontend.auth.deactivated'));
         }
